@@ -12,7 +12,7 @@ class PostForm(forms.ModelForm):
         widgets = {
             'pub_date': DateTimeInput(
                 attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'
-                ),
+            ),
         }
 
     def clean_pub_date(self):

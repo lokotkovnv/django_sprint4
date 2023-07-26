@@ -20,26 +20,26 @@ urlpatterns = [
         'edit_profile/<int:pk>/',
         UserProfileUpdateView.as_view(),
         name='edit_profile'
-        ),
+    ),
     path('posts/<int:pk>/edit/', PostUpdateView.as_view(), name='edit_post'),
     path(
         'posts/<int:pk>/delete/',
         PostDeleteView.as_view(),
         name='delete_post'
-        ),
+    ),
     path(
         'posts/<int:post_id>/comment/',
         CommentCreateView.as_view(),
         name='add_comment'
-        ),
+    ),
     path(
         'posts/<int:post_id>/edit_comment/<int:pk>/',
         CommentUpdateView.as_view(),
         name='edit_comment'
-        ),
+    ),
     path(
         'posts/<int:post_id>/delete_comment/<int:pk>/',
         CommentDeleteView.as_view(),
         name='delete_comment'
-        ),
+    ),
 ]

@@ -58,12 +58,12 @@ def category_posts(request, category_slug):
         Category,
         slug=category_slug,
         is_published=True
-        )
+    )
     now = timezone.now()
     category_posts = category.posts.filter(
         pub_date__lte=now,
         is_published=True
-        )
+    )
     paginator = Paginator(category_posts, 10)
 
     page_number = request.GET.get('page')
@@ -81,11 +81,11 @@ def profile(request, username):
     if request.user == profile:
         user_posts = profile.posts.annotate(
             comment_count=Count('comments')
-            ).order_by('-pub_date')
+        ).order_by('-pub_date')
     else:
         user_posts = profile.posts.filter(
             is_published=True, pub_date__lte=timezone.now()
-            ).annotate(comment_count=Count('comments')).order_by('-pub_date')
+        ).annotate(comment_count=Count('comments')).order_by('-pub_date')
     paginator = Paginator(user_posts, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -107,7 +107,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         return reverse(
             'blog:profile',
             kwargs={'username': self.request.user.username}
-            )
+        )
 
 
 class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
@@ -122,7 +122,7 @@ class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
         form.save()
         return redirect(reverse(
             'blog:profile', kwargs={'username': self.request.user.username})
-            )
+        )
 
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -189,7 +189,7 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return reverse_lazy(
             'blog:post_detail',
             kwargs={'id': self.object.post.id}
-            )
+        )
 
 
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
