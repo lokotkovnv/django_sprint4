@@ -17,9 +17,9 @@ def index(request):
         Post.published.published()
             .filter(
                 category__is_published=True
-            ).annotate(
+        ).annotate(
                 comment_count=Count('comments')
-            ).order_by('-pub_date')
+        ).order_by('-pub_date')
     )
     paginator = Paginator(post_list, settings.PAX_POSTS_PER_PAGE)
     page_number = request.GET.get('page')
@@ -131,7 +131,7 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
         if obj.author != self.request.user:
             return HttpResponseRedirect(
                 reverse('blog:post_detail', args=[obj.id])
-                                        )
+            )
         return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
@@ -154,7 +154,7 @@ class PostDeleteView(LoginRequiredMixin, DeleteView):
         if obj.author != self.request.user:
             return HttpResponseRedirect(
                 reverse('blog:post_detail', args=[obj.id])
-                                        )
+            )
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -191,13 +191,13 @@ class CommentUpdateView(LoginRequiredMixin, UpdateView):
         if obj.author != self.request.user:
             return HttpResponseRedirect(
                 reverse('blog:post_detail', args=[obj.post.id])
-                                        )
+            )
         return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse_lazy(
             'blog:post_detail', kwargs={'id': self.object.post.id}
-                            )
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -214,7 +214,7 @@ class CommentDeleteView(LoginRequiredMixin, DeleteView):
         if obj.author != self.request.user:
             return HttpResponseRedirect(
                 reverse('blog:post_detail', args=[obj.post.id])
-                                        )
+            )
         return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
