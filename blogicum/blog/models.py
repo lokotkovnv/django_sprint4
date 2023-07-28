@@ -1,18 +1,27 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 
 User = get_user_model()
 
 
+class PublishedManager(models.Manager):
+    def published(self):
+        return super().get_queryset().filter(
+            is_published=True,
+            pub_date__lte=timezone.now(),
+        )
+
+
 class PublishedModel(models.Model):
     is_published = models.BooleanField(
-        "Опубликовано",
+        'Опубликовано',
         default=True,
-        help_text="Снимите галочку, чтобы скрыть публикацию.",
+        help_text='Снимите галочку, чтобы скрыть публикацию.',
     )
 
-    created_at = models.DateTimeField("Добавлено", auto_now_add=True)
+    created_at = models.DateTimeField('Добавлено', auto_now_add=True)
 
     class Meta:
         abstract = True
@@ -50,6 +59,8 @@ class Location(PublishedModel):
 
 
 class Post(PublishedModel):
+    objects = models.Manager()
+    published = PublishedManager()
     title = models.CharField('Заголовок', max_length=256)
     text = models.TextField('Текст')
     pub_date = models.DateTimeField(
@@ -95,9 +106,20 @@ class Post(PublishedModel):
 class Comment(models.Model):
     text = models.TextField('текст')
     created_at = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments'
+        )
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
         related_name='comments'
     )
+
+    class Meta:
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'комментарии'
+
+    def __str__(self) -> str:
+        return self.text

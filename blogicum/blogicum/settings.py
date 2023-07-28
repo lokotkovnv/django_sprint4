@@ -11,7 +11,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
-PAX_POSTS_PER_PAGE = 5
+PAX_POSTS_PER_PAGE = 10
 
 INSTALLED_APPS = [
     'django_bootstrap5',
