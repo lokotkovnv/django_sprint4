@@ -14,7 +14,7 @@ from blog.forms import PostForm, UserProfileForm, CommentForm
 def index(request):
     post_list = (
         Post.published.annotate(
-                comment_count=Count('comments')
+            comment_count=Count('comments')
         ).order_by('-pub_date')
     )
     paginator = Paginator(post_list, settings.PAX_POSTS_PER_PAGE)
