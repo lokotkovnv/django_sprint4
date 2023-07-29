@@ -1,5 +1,4 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -8,16 +7,13 @@ from django.db.models import Count
 from django.conf import settings
 from django.http import HttpResponseRedirect
 
-from blog.models import Post, Category, Comment
+from blog.models import Post, Category, Comment, User
 from blog.forms import PostForm, UserProfileForm, CommentForm
 
 
 def index(request):
     post_list = (
-        Post.published.published()
-            .filter(
-                category__is_published=True
-        ).annotate(
+        Post.published.annotate(
                 comment_count=Count('comments')
         ).order_by('-pub_date')
     )
@@ -30,18 +26,11 @@ def index(request):
 
 def post_detail(request, id):
     template = 'blog/detail.html'
-    post_list = Post.objects.filter(id=id)
-    if request.user.is_authenticated and post_list.filter(
-        author=request.user
-    ).exists():
-        post = get_object_or_404(post_list)
-    else:
-        post = get_object_or_404(
-            Post.published.published().filter(
-                id=id,
-                category__is_published=True
-            ).annotate(comment_count=Count('comments'))
-        )
+    post = get_object_or_404(Post, id=id)
+    if not request.user.is_authenticated or request.user != post.author:
+        post = get_object_or_404(Post.published.filter(
+            id=id,
+        ).annotate(comment_count=Count('comments')))
 
     comments = post.comments.all()
     comment_form = CommentForm()
@@ -55,7 +44,7 @@ def category_posts(request, category_slug):
         slug=category_slug,
         is_published=True
     )
-    category_posts = Post.published.published().filter(
+    category_posts = Post.published.filter(
         category=category
     )
     paginator = Paginator(category_posts, settings.PAX_POSTS_PER_PAGE)
@@ -67,9 +56,6 @@ def category_posts(request, category_slug):
     return render(request, 'blog/category.html', context)
 
 
-User = get_user_model()
-
-
 def profile(request, username):
     profile = get_object_or_404(User, username=username)
     if request.user == profile:
@@ -77,7 +63,7 @@ def profile(request, username):
             comment_count=Count('comments')
         ).order_by('-pub_date')
     else:
-        user_posts = Post.published.published().filter(
+        user_posts = Post.published.filter(
             author=profile.id
         ).annotate(
             comment_count=Count('comments')
@@ -170,7 +156,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        post = get_object_or_404(Post, pk=self.kwargs['post_id'])
+        post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
         form.instance.post = post
         return super().form_valid(form)
 

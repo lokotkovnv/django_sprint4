@@ -7,10 +7,11 @@ User = get_user_model()
 
 
 class PublishedManager(models.Manager):
-    def published(self):
+    def get_queryset(self):
         return super().get_queryset().filter(
             is_published=True,
             pub_date__lte=timezone.now(),
+            category__is_published=True,
         )
 
 
@@ -59,8 +60,6 @@ class Location(PublishedModel):
 
 
 class Post(PublishedModel):
-    objects = models.Manager()
-    published = PublishedManager()
     title = models.CharField('Заголовок', max_length=256)
     text = models.TextField('Текст')
     pub_date = models.DateTimeField(
@@ -94,6 +93,9 @@ class Post(PublishedModel):
     )
     image = models.ImageField('Фото', upload_to='blogicum_images', blank=True)
 
+    objects = models.Manager()
+    published = PublishedManager()
+
     class Meta:
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
@@ -101,6 +103,9 @@ class Post(PublishedModel):
 
     def __str__(self) -> str:
         return self.title
+
+
+TEXT_SLICE = 15
 
 
 class Comment(models.Model):
@@ -122,4 +127,5 @@ class Comment(models.Model):
         verbose_name_plural = 'комментарии'
 
     def __str__(self) -> str:
-        return self.text
+        return (self.text[:TEXT_SLICE] + '...'
+                ) if len(self.text) > TEXT_SLICE else self.text
